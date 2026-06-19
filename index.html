@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mileage — credit & token optimizer</title>
+<meta name="description" content="Get more output per credit across Higgsfield, Magnific, Claude and ChatGPT. Tool picker, settings recipes, input guide, rule book, and a plan recommender." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="mast__brand">
+      <div class="mast__mark" id="brandGauge"></div>
+      <div>
+        <h1 class="mast__name">Mileage</h1>
+        <p class="mast__tag">More output per credit, across your AI stack.</p>
+      </div>
+    </div>
+    <div class="mast__stack" id="platStack"></div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+
+  <main class="main">
+    <!-- Tool picker -->
+    <section class="view view--on" id="view-picker" role="tabpanel">
+      <p class="view__intro">Pick a task and get the tool, model and setting that does the job without overspending. Cost pills are relative, not exact pricing.</p>
+      <div class="controls">
+        <div class="chips" id="pickerChips"></div>
+        <input class="search" id="pickerSearch" placeholder="Search a task…" aria-label="Search tasks" />
+      </div>
+      <div class="grid grid--cards" id="pickerGrid"></div>
+    </section>
+
+    <!-- Recipes -->
+    <section class="view" id="view-recipes" role="tabpanel">
+      <p class="view__intro">Settings tuned for quality-per-credit. The striped bar shows roughly what the wasteful default costs you over the smart one.</p>
+      <div class="grid grid--cards" id="recipesGrid"></div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="view" id="view-inputs" role="tabpanel">
+      <p class="view__intro">What to feed each tool — the part that decides whether you get it right on the first paid try.</p>
+      <div class="grid grid--cards" id="inputsGrid"></div>
+    </section>
+
+    <!-- Rule book -->
+    <section class="view" id="view-rules" role="tabpanel">
+      <p class="view__intro">If you're making ___, always do ___. Read it like a checklist.</p>
+      <div class="controls">
+        <div class="chips" id="rulesChips"></div>
+        <input class="search" id="rulesSearch" placeholder="Filter rules…" aria-label="Filter rules" />
+      </div>
+      <div class="legend">
+        <span><i class="dot dot--always"></i> Always — hard rule</span>
+        <span><i class="dot dot--default"></i> Default — unless you've a real reason</span>
+        <span><i class="dot dot--avoid"></i> Avoid — anti-pattern</span>
+      </div>
+      <div id="rulesList"></div>
+      <p class="empty" id="rulesEmpty" style="display:none;">No rule matches that. Try a broader word, or clear the filter.</p>
+    </section>
+
+    <!-- Plan picker -->
+    <section class="view" id="view-plan" role="tabpanel">
+      <p class="view__intro">Work out which credit pack to buy. Estimate your monthly burn on the left, drop in the plans a platform offers on the right, and Mileage ranks them. Your inputs are saved in this browser.</p>
+      <div class="plan">
+        <div class="panel">
+          <div class="panel__head">
+            <h3 class="panel__title">Your monthly usage</h3>
+            <span class="panel__hint">credits you expect to spend</span>
+          </div>
+          <div class="rowhdr rowhdr--usage"><span>Activity</span><span>Qty</span><span>Cr ea</span><span>= sub</span><span></span></div>
+          <div id="usageRows"></div>
+          <button class="addbtn" id="addUsage">+ Add activity</button>
+          <div class="totalbar">
+            <span class="totalbar__lbl">Estimated monthly burn</span>
+            <span><span class="totalbar__val mono" id="usageTotal">0</span><span class="totalbar__unit">credits/mo</span></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <h3 class="panel__title">Plans on offer</h3>
+            <div class="curr">
+              <label for="currSel">Currency</label>
+              <select id="currSel"><option>$</option><option>€</option><option>£</option><option>₹</option><option>¥</option></select>
+            </div>
+          </div>
+          <div class="rowhdr rowhdr--plan"><span>Plan</span><span>Price</span><span>Credits</span><span></span></div>
+          <div id="planRows"></div>
+          <button class="addbtn" id="addPlan">+ Add plan</button>
+        </div>
+      </div>
+
+      <div class="results" id="planResults"></div>
+    </section>
+  </main>
+
+  <footer class="foot" id="foot"></footer>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
