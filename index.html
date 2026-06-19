@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mileage — credit & token optimizer</title>
-<meta name="description" content="Get more output per credit across Higgsfield, Magnific, Claude and ChatGPT. Tool picker, settings recipes, input guide, rule book, and a plan recommender." />
+<title>Mileage — spend less, get more from your AI tools</title>
+<meta name="description" content="Tell Mileage what you're making and it recommends the model and settings that get good output without wasting credits across Higgsfield, Freepik, Claude and ChatGPT." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -12,13 +12,10 @@
 </head>
 <body>
 <div class="wrap">
-  <header class="mast">
-    <div class="mast__brand">
-      <div class="mast__mark" id="brandGauge"></div>
-      <div>
-        <h1 class="mast__name">Mileage</h1>
-        <p class="mast__tag">More output per credit, across your AI stack.</p>
-      </div>
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span id="brandGauge"></span>
+      <span class="topbar__name">Mileage</span>
     </div>
     <div class="mast__stack" id="platStack"></div>
   </header>
@@ -26,30 +23,54 @@
   <nav class="tabs" id="tabs" role="tablist"></nav>
 
   <main class="main">
-    <!-- Tool picker -->
-    <section class="view view--on" id="view-picker" role="tabpanel">
-      <p class="view__intro">Pick a task and get the tool, model and setting that does the job without overspending. Cost pills are relative, not exact pricing.</p>
-      <div class="controls">
-        <div class="chips" id="pickerChips"></div>
-        <input class="search" id="pickerSearch" placeholder="Search a task…" aria-label="Search tasks" />
+
+    <!-- HOME -->
+    <section class="view view--on" id="view-home" role="tabpanel">
+      <div class="hero">
+        <p class="hero__kicker">Credit &amp; token mileage</p>
+        <h1 class="hero__title">Stop paying for output <em>no one can see.</em></h1>
+        <p class="hero__sub">Tell Mileage what you're making. It points you to the right model — Kling, Seedance, Nano Banana, Seedream, GPT and more — and the exact settings that look good without burning credits across Higgsfield, Freepik, Claude and ChatGPT.</p>
+        <div class="hero__note">
+          <span class="mk">note</span>
+          <span><b>Mileage tunes models and settings, not prompts.</b> Rewriting or optimizing a prompt needs an AI of its own — so this tool deliberately leaves that out and stays fast, free and fully offline.</span>
+        </div>
       </div>
-      <div class="grid grid--cards" id="pickerGrid"></div>
+
+      <div class="steps">
+        <div class="step"><span class="step__n">01</span><span class="step__t"><b>Tell it what you're making</b> — a reel, an upscale, a hard reasoning task.</span></div>
+        <div class="step"><span class="step__n">02</span><span class="step__t"><b>It picks the model and settings</b> tuned for quality per credit.</span></div>
+        <div class="step"><span class="step__n">03</span><span class="step__t"><b>You spend less</b> and skip the trial-and-error re-rolls.</span></div>
+      </div>
+
+      <div class="tiles" id="tiles"></div>
     </section>
 
-    <!-- Recipes -->
-    <section class="view" id="view-recipes" role="tabpanel">
-      <p class="view__intro">Settings tuned for quality-per-credit. The striped bar shows roughly what the wasteful default costs you over the smart one.</p>
-      <div class="grid grid--cards" id="recipesGrid"></div>
+    <!-- RECOMMENDER -->
+    <section class="view" id="view-recommender" role="tabpanel">
+      <h2 class="section-h">Recommend my setup</h2>
+      <div class="rec">
+        <p class="rec__caveat">Answer a couple of questions and Mileage names the model + settings. It won't write your prompt — that needs an AI; everything here is just routing logic.</p>
+        <div id="recMedium"></div>
+        <div id="recQuestions"></div>
+        <div id="recResult"></div>
+      </div>
     </section>
 
-    <!-- Inputs -->
-    <section class="view" id="view-inputs" role="tabpanel">
-      <p class="view__intro">What to feed each tool — the part that decides whether you get it right on the first paid try.</p>
-      <div class="grid grid--cards" id="inputsGrid"></div>
+    <!-- MODELS -->
+    <section class="view" id="view-models" role="tabpanel">
+      <h2 class="section-h">Models, by strength</h2>
+      <p class="view__intro">The same platform hosts several models, and they're good at different things. Pick the one that fits the job — the Recommender does this for you, this is the reference behind it.</p>
+      <div class="controls">
+        <div class="chips" id="modelChips"></div>
+        <input class="search" id="modelSearch" placeholder="Search models…" aria-label="Search models" />
+      </div>
+      <div class="grid" id="modelGrid"></div>
+      <p class="empty" id="modelEmpty" style="display:none;">No model matches that. Try a broader word.</p>
     </section>
 
-    <!-- Rule book -->
+    <!-- RULES -->
     <section class="view" id="view-rules" role="tabpanel">
+      <h2 class="section-h">Rule Book</h2>
       <p class="view__intro">If you're making ___, always do ___. Read it like a checklist.</p>
       <div class="controls">
         <div class="chips" id="rulesChips"></div>
@@ -64,40 +85,31 @@
       <p class="empty" id="rulesEmpty" style="display:none;">No rule matches that. Try a broader word, or clear the filter.</p>
     </section>
 
-    <!-- Plan picker -->
+    <!-- PLANS -->
     <section class="view" id="view-plan" role="tabpanel">
-      <p class="view__intro">Work out which credit pack to buy. Estimate your monthly burn on the left, drop in the plans a platform offers on the right, and Mileage ranks them. Your inputs are saved in this browser.</p>
+      <h2 class="section-h">Plan picker</h2>
+      <p class="view__intro">Work out which credit pack to buy. Estimate your monthly burn on the left, drop in the plans a platform offers on the right, and Mileage ranks them. Inputs are saved in this browser.</p>
       <div class="plan">
         <div class="panel">
-          <div class="panel__head">
-            <h3 class="panel__title">Your monthly usage</h3>
-            <span class="panel__hint">credits you expect to spend</span>
-          </div>
+          <div class="panel__head"><h3 class="panel__title">Your monthly usage</h3><span class="panel__hint">credits you expect to spend</span></div>
           <div class="rowhdr rowhdr--usage"><span>Activity</span><span>Qty</span><span>Cr ea</span><span>= sub</span><span></span></div>
           <div id="usageRows"></div>
           <button class="addbtn" id="addUsage">+ Add activity</button>
-          <div class="totalbar">
-            <span class="totalbar__lbl">Estimated monthly burn</span>
-            <span><span class="totalbar__val mono" id="usageTotal">0</span><span class="totalbar__unit">credits/mo</span></span>
-          </div>
+          <div class="totalbar"><span class="totalbar__lbl">Estimated monthly burn</span><span><span class="totalbar__val mono" id="usageTotal">0</span><span class="totalbar__unit">credits/mo</span></span></div>
         </div>
-
         <div class="panel">
-          <div class="panel__head">
-            <h3 class="panel__title">Plans on offer</h3>
-            <div class="curr">
-              <label for="currSel">Currency</label>
-              <select id="currSel"><option>$</option><option>€</option><option>£</option><option>₹</option><option>¥</option></select>
-            </div>
+          <div class="panel__head"><h3 class="panel__title">Plans on offer</h3>
+            <div class="curr"><label for="currSel">Currency</label>
+              <select id="currSel"><option>$</option><option>€</option><option>£</option><option>₹</option><option>¥</option></select></div>
           </div>
           <div class="rowhdr rowhdr--plan"><span>Plan</span><span>Price</span><span>Credits</span><span></span></div>
           <div id="planRows"></div>
           <button class="addbtn" id="addPlan">+ Add plan</button>
         </div>
       </div>
-
       <div class="results" id="planResults"></div>
     </section>
+
   </main>
 
   <footer class="foot" id="foot"></footer>

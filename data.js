@@ -1,146 +1,186 @@
 /* =========================================================================
-   MILEAGE — seed data
-   This is the ONLY file you need to edit to keep the site current.
-   Everything below is plain data. Add, remove, or change entries freely.
+   MILEAGE — seed data (the only file you edit to keep guidance current)
+   Sections: platforms · models · recommend · rules · inputTips
+   All content is illustrative. Models and pricing move fast — verify before
+   trusting a specific figure.
    ========================================================================= */
 
 window.DATA = {
 
-  // Platforms shown as badges. tone drives the dot colour (video/image/text).
+  /* Badges. tone sets the dot colour: video / image / text */
   platforms: {
-    higgsfield: { label: "Higgsfield", kind: "AI video & image", tone: "video" },
-    magnific:   { label: "Magnific",   kind: "Upscale & enhance (Freepik)", tone: "image" },
-    claude:     { label: "Claude",     kind: "Reasoning · writing · code", tone: "text" },
-    chatgpt:    { label: "ChatGPT",    kind: "Assistant · reasoning · images", tone: "text" },
+    higgsfield: { label: "Higgsfield", tone: "video" },
+    freepik:    { label: "Freepik",    tone: "image" },
+    claude:     { label: "Claude",     tone: "text"  },
+    chatgpt:    { label: "ChatGPT",    tone: "text"  },
   },
 
-  // TOOL PICKER — use case -> recommendation. cost: 1 low / 2 med / 3 high.
-  picker: [
-    { cat:"Video", task:"Short social video (Reel / TikTok / Short)", plat:"higgsfield",
-      pick:"720p · 5s · low–med motion preset", cost:1,
-      why:"Platforms re-compress vertical video hard. 1080p and 10s mostly buy credits you can't see on a phone." },
-    { cat:"Video", task:"Cinematic b-roll / establishing shot", plat:"higgsfield",
-      pick:"Camera-move preset · higher steps · 1080p", cost:3,
-      why:"Here the resolution and a deliberate camera move actually show. Worth the spend; keep clips to 5s." },
-    { cat:"Video", task:"Talking-head / product loop for a landing page", plat:"higgsfield",
-      pick:"1080p · static or slow push · 24fps", cost:2,
-      why:"Detail matters on desktop, but heavy motion presets cost more and add nothing to a near-static shot." },
-    { cat:"Image / Upscale", task:"Upscale a real photo, keep it faithful", plat:"magnific",
-      pick:"2x · low Creativity · high Resemblance", cost:1,
-      why:"High creativity invents detail and forces re-runs. Faithful upscales are cheaper and need fewer retries." },
-    { cat:"Image / Upscale", task:"Reimagine an illustration at higher res", plat:"magnific",
-      pick:"4x · high Creativity · med Fractality", cost:3,
-      why:"Stylized work is where creativity earns its cost. Going past 4x rarely changes the final crop you ship." },
-    { cat:"Image / Upscale", task:"Generate a marketing / hero image", plat:"chatgpt",
-      pick:"Image model · 1 reference + tight style words", cost:2,
-      why:"A reference image does the work ten adjectives can't, cutting regenerations that quietly burn credits." },
-    { cat:"Text / Reasoning", task:"Quick facts, drafting, rephrasing, summaries", plat:"claude",
-      pick:"Fast tier (Haiku) — or ChatGPT mini", cost:1,
-      why:"Routine text doesn't need a frontier model. The cheap tier is 10-20x less per token for the same result." },
-    { cat:"Text / Reasoning", task:"Hard reasoning, math, architecture, tricky bugs", plat:"claude",
-      pick:"Top tier (Opus) — or ChatGPT reasoning model", cost:3,
-      why:"The one place to pay up. A cheap model that fails sends you into a retry loop that costs more overall." },
-    { cat:"Text / Reasoning", task:"Long document analysis / big context", plat:"claude",
-      pick:"Balanced tier (Sonnet) · prompt caching on", cost:2,
-      why:"Sonnet handles large context well; caching a repeated document stops you re-paying for the same tokens." },
-    { cat:"Text / Reasoning", task:"Coding: refactor, tests, everyday changes", plat:"claude",
-      pick:"Balanced tier (Sonnet)", cost:2,
-      why:"Reserve the top tier for genuinely hard problems. Most coding lands first-try on the balanced tier." },
-    { cat:"Text / Reasoning", task:"Bulk generation (many short outputs)", plat:"chatgpt",
-      pick:"Mini / fast tier · batch the calls", cost:1,
-      why:"Volume multiplies waste. Cheapest capable model + batching is the difference between cents and dollars." },
+  /* ---- MODEL LIBRARY ----
+     These are models you reach THROUGH the platforms above (e.g. Freepik and
+     Higgsfield both host Kling, Seedance, etc.). type: video | image.
+     tier: 1 cheap / 2 mid / 3 premium. tags drive the recommender. */
+  models: [
+    // ----- video -----
+    { id:"seedance", label:"Seedance", type:"video", tier:1,
+      platforms:["higgsfield","freepik"],
+      tags:["social","fast","cheap","dynamic"],
+      strengths:["Fast and easy on credits","Lively, dynamic motion","Handles multi-shot sequences well"],
+      weakness:"Less fine camera control, and can over-animate calm scenes.",
+      bestFor:"High-volume social clips where speed and cost matter most." },
+
+    { id:"kling", label:"Kling", type:"video", tier:3,
+      platforms:["higgsfield","freepik"],
+      tags:["cinematic","realistic","quality","stylized"],
+      strengths:["Realistic motion and physics","Strong prompt adherence","Holds up over longer, coherent shots"],
+      weakness:"Pricier and slower per clip — overkill for a quick social cut.",
+      bestFor:"Cinematic, realistic shots where motion quality actually shows." },
+
+    { id:"higgsfield", label:"Higgsfield presets", type:"video", tier:2,
+      platforms:["higgsfield"],
+      tags:["camera-control","control","cinematic"],
+      strengths:["Precise camera moves (push, orbit, crash)","Repeatable cinematic presets","Great for deliberately designed motion"],
+      weakness:"Base realism leans on your start frame; stacked presets can look templated.",
+      bestFor:"Shots where the camera move is the whole point." },
+
+    { id:"veo", label:"Veo", type:"video", tier:3,
+      platforms:["freepik"],
+      tags:["quality","realistic","cinematic"],
+      strengths:["High visual fidelity","Strong shot coherence","Native audio in some modes"],
+      weakness:"Premium cost — reserve it for hero shots, not drafts.",
+      bestFor:"Flagship hero shots where quality is non-negotiable." },
+
+    // ----- image -----
+    { id:"nanobanana", label:"Nano Banana", type:"image", tier:1,
+      platforms:["freepik"],
+      tags:["edit","generate","consistency","cheap","fast","product"],
+      strengths:["Best-in-class image editing","Keeps a character or product consistent","Fast, cheap, blends several inputs"],
+      weakness:"For brand-new generation, aesthetic-tuned models often look more polished.",
+      bestFor:"Editing, retouching, and keeping a subject consistent across shots." },
+
+    { id:"seedream", label:"Seedream", type:"image", tier:2,
+      platforms:["freepik"],
+      tags:["generate","photoreal","quality","illustration","text-in-image"],
+      strengths:["High aesthetic quality from scratch","Strong realism and fine detail","Good with design and typography"],
+      weakness:"Editing precision trails dedicated edit models.",
+      bestFor:"Generating polished images and illustrations from a prompt." },
+
+    { id:"gptimage", label:"GPT Image", type:"image", tier:3,
+      platforms:["chatgpt","freepik"],
+      tags:["generate","edit","instruction","text-in-image","product"],
+      strengths:["Follows complex instructions reliably","Renders readable text in images","Good compositional control"],
+      weakness:"Slower and pricier; can look a touch flat next to aesthetic-tuned models.",
+      bestFor:"Prompts with lots of specific requirements, or text inside the image." },
+
+    { id:"flux", label:"Flux", type:"image", tier:2,
+      platforms:["freepik"],
+      tags:["generate","photoreal","quality"],
+      strengths:["Strong photorealism","Versatile, dependable base model","Good detail and lighting"],
+      weakness:"Weaker text rendering and fewer editing controls.",
+      bestFor:"Photoreal generation when you want a reliable workhorse." },
+
+    { id:"magnific", label:"Magnific", type:"image", tier:2,
+      platforms:["freepik"],
+      tags:["upscale","enhance"],
+      strengths:["Adds real resolution and detail","Faithful or creative modes","Great for finishing and print"],
+      weakness:"High creativity invents detail and forces re-runs; it magnifies source flaws.",
+      bestFor:"Upscaling and enhancing an image you already have." },
   ],
 
-  // RECIPES — optimal vs overkill settings. save: 0..1 (share of credits saved vs the wasteful default).
-  recipes: [
-    { plat:"higgsfield", title:"Social reel",
-      optimal:["720p","5s","Motion 0.4-0.6","24 fps"], overkill:["1080p","10s","Max motion","60 fps"], save:0.6,
-      note:"Vertical feeds downscale anyway. Spend on a good start frame, not pixels." },
-    { plat:"higgsfield", title:"Cinematic shot",
-      optimal:["1080p","5s","1 camera move","Higher steps"], overkill:["4K-style upscale","10s","Stacked moves"], save:0.35,
-      note:"One clean move reads better than three. Stacking presets multiplies cost and chaos." },
-    { plat:"magnific", title:"Faithful photo upscale",
-      optimal:["2x","Creativity -1->0","Resemblance high","HDR low"], overkill:["8x-16x","Creativity high","HDR high"], save:0.7,
-      note:"High creativity = invented detail = retries. Big factors blow past your real output size." },
-    { plat:"magnific", title:"Creative re-render",
-      optimal:["4x","Creativity high","Fractality med","Resemblance low"], overkill:["16x","Fractality max"], save:0.45,
-      note:"4x covers almost every crop you'll publish. Max fractality adds noise, not usable detail." },
-    { plat:"claude", title:"Everyday text task",
-      optimal:["Fast tier (Haiku)","Trim context","No verbose preamble"], overkill:["Top tier (Opus)","Paste full history"], save:0.85,
-      note:"Model choice dwarfs every other lever. Match the tier to the task's actual difficulty." },
-    { plat:"claude", title:"Repeated long context",
-      optimal:["Balanced (Sonnet)","Prompt caching ON","Reuse cached doc"], overkill:["Re-paste doc each turn","Top tier by default"], save:0.5,
-      note:"Caching stops you re-paying for the same document on every single message." },
-    { plat:"chatgpt", title:"Routine assistant use",
-      optimal:["Mini / standard tier","One clear instruction"], overkill:["Reasoning model for everything"], save:0.6,
-      note:"Reserve reasoning models for problems that genuinely need step-by-step thinking." },
-    { plat:"chatgpt", title:"Image generation",
-      optimal:["1 reference image","Short style words","Right size once"], overkill:["Prompt-only","Regenerate to fix size"], save:0.4,
-      note:"A reference cuts regenerations. Pick the output size up front instead of re-rolling." },
-  ],
+  /* ---- RECOMMENDER CONFIG ----
+     Questions the user answers, plus the settings/tips that go with each path.
+     The model itself is chosen by scoring tags (see app.js). */
+  recommend: {
+    video: {
+      q1: { label:"What are you making?", key:"purpose", options:[
+        { id:"social",   label:"Short social video", want:["social","fast","cheap"], settings:["720p","~5s","Low–med motion","24 fps"] },
+        { id:"cinematic",label:"Cinematic / realistic shot", want:["cinematic","realistic","quality"], settings:["1080p","~5s","One camera move","Higher steps"] },
+        { id:"product",  label:"Product / explainer loop", want:["control"], settings:["1080p","Static or slow push","24 fps","Short loop"] },
+        { id:"stylized", label:"Stylized / creative", want:["stylized"], settings:["720–1080p","Higher creativity","~5s"] },
+      ]},
+      q2: { label:"What matters most?", key:"priority", options:[
+        { id:"cost",    label:"Spend the least", boost:["cheap","fast"] },
+        { id:"quality", label:"Best quality",    boost:["realistic","quality"] },
+        { id:"control", label:"Most control",    boost:["camera-control","control"] },
+      ]},
+    },
+    image: {
+      q1: { label:"What do you need?", key:"task", options:[
+        { id:"generate",label:"Generate a new image", hard:"generate", settings:["Set the size up front","Add one reference if you can"] },
+        { id:"edit",    label:"Edit an existing image", hard:"edit", settings:["Feed the source image","Describe only the change"] },
+        { id:"upscale", label:"Upscale / enhance", hard:"upscale", settings:["2× faithful or 4× creative","Clean the source first"] },
+      ]},
+      q2: { label:"What's the subject?", key:"style", onlyFor:["generate","edit"], options:[
+        { id:"photoreal",   label:"Photoreal", want:["photoreal","quality"] },
+        { id:"illustration",label:"Illustration / stylized", want:["illustration"] },
+        { id:"product",     label:"Product shot", want:["product"] },
+        { id:"text",        label:"Text / typography heavy", want:["text-in-image","instruction"] },
+      ]},
+      q3: { label:"What matters most?", key:"priority", options:[
+        { id:"cost",       label:"Spend the least", boost:["cheap","fast"] },
+        { id:"quality",    label:"Best quality",    boost:["quality","photoreal"] },
+        { id:"instruction",label:"Nail the details", boost:["instruction","text-in-image"] },
+      ]},
+    },
+    text: {
+      q1: { label:"What's the task?", key:"task", options:[
+        { id:"routine",  label:"Routine (draft, summarize, rephrase)",
+          pick:"Fast tier", platforms:["claude","chatgpt"], detail:"Claude Haiku or ChatGPT mini",
+          settings:["Trim the context","Skip the preamble"],
+          why:"Routine text doesn't need a frontier model — the cheap tier is ~10–20× less per token for the same result." },
+        { id:"reasoning",label:"Hard reasoning / math / tricky bug",
+          pick:"Top tier", platforms:["claude","chatgpt"], detail:"Claude Opus or a ChatGPT reasoning model",
+          settings:["State the goal precisely","Give the constraints once"],
+          why:"The one place to pay up. A cheap model that fails sends you into a retry loop that costs more overall." },
+        { id:"longcontext",label:"Long document / big context",
+          pick:"Balanced tier", platforms:["claude"], detail:"Claude Sonnet",
+          settings:["Prompt caching ON","Reference, don't re-paste"],
+          why:"Sonnet handles large context well; caching stops you re-paying for the same document every turn." },
+        { id:"coding",   label:"Everyday coding",
+          pick:"Balanced tier", platforms:["claude"], detail:"Claude Sonnet",
+          settings:["Show the file, not the repo","One change at a time"],
+          why:"Most coding lands first-try on the balanced tier; reserve the top tier for the genuinely hard problems." },
+        { id:"bulk",     label:"Bulk (many short outputs)",
+          pick:"Cheapest capable model", platforms:["chatgpt","claude"], detail:"Mini / fast tier",
+          settings:["Batch the calls","One tight instruction"],
+          why:"Volume multiplies every inefficiency — cheapest capable model plus batching is the whole game here." },
+      ]},
+    },
+  },
 
-  // INPUTS — what to feed each platform.
-  inputs: [
-    { plat:"higgsfield",
-      do:["Start from a clean, high-contrast key frame — motion amplifies whatever's already there.",
-          "Keep one clear subject; busy backgrounds smear when the camera moves.",
-          "Name the camera move in plain words (slow push in, orbit left) rather than stacking presets."],
-      dont:["Don't feed a noisy or low-res start frame and expect the model to clean it up.",
-            "Don't request long durations to 'get more' — you mostly get more credits spent."] },
-    { plat:"magnific",
-      do:["Feed the cleanest source you have — artifacts and JPEG noise get magnified, not removed.",
-          "Pick the upscale factor from your real target size, not the maximum available.",
-          "For faithful work, lean on Resemblance; for re-imagining, lean on Creativity."],
-      dont:["Don't upscale an already-upscaled image — errors compound.",
-            "Don't max every slider; high Creativity + high HDR often needs several paid retries."] },
-    { plat:"claude",
-      do:["Give structured context: label sections, use tags/headers so the model finds what matters.",
-          "Show one or two examples of the output you want instead of describing it at length.",
-          "Cache or reuse long reference material rather than re-pasting it every turn."],
-      dont:["Don't paste entire chat histories or whole files when a relevant slice will do.",
-            "Don't pad with politeness and preamble — it's tokens in and tokens echoed back."] },
-    { plat:"chatgpt",
-      do:["Put durable rules in a system / custom-instruction slot so you don't repeat them each message.",
-          "For images, attach a reference and use a few precise style words.",
-          "Ask for the format you want once, explicitly, to avoid reformat round-trips."],
-      dont:["Don't re-explain the same standing context in every prompt.",
-            "Don't rely on adjectives alone for images when one reference would settle it."] },
-  ],
-
-  // RULE BOOK — tag: always / default / avoid.
+  /* ---- RULE BOOK ---- tag: always / default / avoid */
   rules: [
     { cat:"Video", tag:"always", if:"making a social reel, Short or TikTok", then:"cap it at 720p and about 5 seconds", why:"Vertical feeds re-compress hard. The extra pixels and seconds never reach the viewer — they just spend credits." },
     { cat:"Video", tag:"default", if:"the shot is near-static (talking head, product loop)", then:"skip the heavy motion presets", why:"Motion presets cost more and add nothing to a subject that isn't really moving." },
-    { cat:"Video", tag:"default", if:"you want a cinematic feel", then:"use exactly one camera move, not stacked ones", why:"One clean push or orbit reads better — and costs less — than three presets fighting each other." },
+    { cat:"Video", tag:"default", if:"you want a cinematic feel", then:"pick a realism model and use one camera move", why:"One clean push or orbit on a model like Kling reads better — and cheaper — than stacking presets." },
     { cat:"Video", tag:"always", if:"your start frame is noisy or low-res", then:"fix the frame before you generate", why:"Motion amplifies whatever's already there. A weak frame guarantees a paid re-roll." },
     { cat:"Video", tag:"avoid", if:"tempted to render 10s 'to get more'", then:"render 5s and trim instead", why:"Duration multiplies the credit cost, usually for footage you cut anyway." },
-    { cat:"Video", tag:"default", if:"the background is busy", then:"simplify or blur it first", why:"Complex backgrounds smear under motion and force retries." },
+    { cat:"Video", tag:"default", if:"churning out lots of social clips", then:"use a fast, cheap model like Seedance", why:"Save the premium realism models for the shots where the quality actually shows." },
 
+    { cat:"Image & Upscale", tag:"default", if:"editing or retouching an existing image", then:"use an edit-first model like Nano Banana", why:"Edit models keep the subject consistent and cost far less than re-generating from scratch." },
+    { cat:"Image & Upscale", tag:"default", if:"generating a polished image from a prompt", then:"use an aesthetic model like Seedream or Flux", why:"They look better out of the box, so you regenerate less." },
+    { cat:"Image & Upscale", tag:"default", if:"the image needs readable text or strict details", then:"use GPT Image", why:"It follows instructions and renders text more reliably, saving correction rounds." },
     { cat:"Image & Upscale", tag:"always", if:"upscaling a real photo you want to stay faithful", then:"keep Creativity low and Resemblance high", why:"High creativity invents detail that wasn't there, which sends you into re-runs." },
-    { cat:"Image & Upscale", tag:"always", if:"the source has JPEG noise or artifacts", then:"clean it before upscaling", why:"Upscaling magnifies flaws, it doesn't remove them." },
-    { cat:"Image & Upscale", tag:"always", if:"choosing an upscale factor", then:"pick it from your real output size, not the maximum", why:"8x-16x past the crop you'll actually publish is pure waste." },
-    { cat:"Image & Upscale", tag:"default", if:"re-imagining an illustration at higher res", then:"treat 4x with higher Creativity as the ceiling worth paying for", why:"Past 4x rarely changes the crop you end up shipping." },
+    { cat:"Image & Upscale", tag:"always", if:"choosing an upscale factor", then:"pick it from your real output size, not the maximum", why:"8×–16× past the crop you'll actually publish is pure waste." },
     { cat:"Image & Upscale", tag:"avoid", if:"an image has already been upscaled once", then:"don't upscale it again", why:"Errors compound across passes — you pay more for a worse result." },
     { cat:"Image & Upscale", tag:"default", if:"generating a marketing or hero image", then:"attach one reference image", why:"A reference does what ten adjectives can't, cutting the regenerations that quietly burn credits." },
-    { cat:"Image & Upscale", tag:"avoid", if:"the result is close but the dimensions are wrong", then:"set the size up front next time rather than re-rolling", why:"Re-rolling to fix size pays full price for a framing tweak." },
 
-    { cat:"Text & Reasoning", tag:"always", if:"the task is routine (draft, summarize, rephrase, classify)", then:"use the fast/cheap tier", why:"Routine text doesn't need a frontier model. The cheap tier is roughly 10-20x less per token for the same result." },
-    { cat:"Text & Reasoning", tag:"always", if:"the task is genuinely hard (math, architecture, a tricky bug)", then:"use the top tier", why:"This is the one place to pay up. A cheap model that fails drops you into a retry loop that costs more overall." },
-    { cat:"Text & Reasoning", tag:"default", if:"doing everyday coding (refactors, tests, small changes)", then:"default to the balanced tier", why:"Most coding lands first-try without the top tier; reserve that for the hard problems." },
+    { cat:"Text & Reasoning", tag:"always", if:"the task is routine (draft, summarize, rephrase)", then:"use the fast/cheap tier", why:"Routine text doesn't need a frontier model. The cheap tier is roughly 10–20× less per token for the same result." },
+    { cat:"Text & Reasoning", tag:"always", if:"the task is genuinely hard (math, architecture, a tricky bug)", then:"use the top tier", why:"A cheap model that fails drops you into a retry loop that costs more overall." },
+    { cat:"Text & Reasoning", tag:"default", if:"doing everyday coding", then:"default to the balanced tier", why:"Most coding lands first-try without the top tier; reserve that for the hard problems." },
     { cat:"Text & Reasoning", tag:"always", if:"working with large context you'll reuse across turns", then:"turn on prompt caching", why:"Caching stops you re-paying for the same document on every single message." },
-    { cat:"Text & Reasoning", tag:"avoid", if:"you keep re-pasting the same document each turn", then:"cache or reference it instead", why:"Every re-paste is full-price tokens for context the model already had." },
     { cat:"Text & Reasoning", tag:"always", if:"generating many short outputs in bulk", then:"use the cheapest capable model and batch the calls", why:"Volume multiplies every inefficiency — this is where waste compounds fastest." },
 
-    { cat:"Prompts & Tokens", tag:"always", if:"a prompt carries politeness or preamble", then:"cut it", why:"It's tokens going in and tokens echoed back, for zero quality gain." },
-    { cat:"Prompts & Tokens", tag:"default", if:"you can show an example of what you want", then:"show one instead of describing the format at length", why:"An example is denser and clearer than a paragraph about it." },
-    { cat:"Prompts & Tokens", tag:"always", if:"you have standing rules or context", then:"put them in a system / custom-instruction slot", why:"So you state them once instead of in every message." },
-    { cat:"Prompts & Tokens", tag:"always", if:"compressing a prompt", then:"protect the instructions, constraints, examples and data", why:"Over-cutting causes a re-run that costs more than every token you saved. Shorter is not the goal — right-sized is." },
-    { cat:"Prompts & Tokens", tag:"default", if:"using aggressive / telegraphic compression", then:"re-read it before sending", why:"Stripped-down prompts can drift into ambiguity the model fills in wrong." },
-    { cat:"Prompts & Tokens", tag:"default", if:"pasting a whole file or chat history", then:"paste only the relevant slice", why:"The model rarely needs all of it, and you pay for every line." },
-
-    { cat:"Every tool", tag:"always", if:"a cheaper setting looks identical in the final medium", then:"use the cheaper setting", why:"The whole game in one rule: spend only where the viewer or reader can actually tell." },
-    { cat:"Every tool", tag:"default", if:"you're unsure what a setting costs", then:"test once small before a batch run", why:"One cheap probe beats discovering the cost across fifty outputs." },
+    { cat:"Every tool", tag:"always", if:"a cheaper setting or model looks identical in the final medium", then:"use the cheaper one", why:"The whole game in one rule: spend only where the viewer or reader can actually tell." },
+    { cat:"Every tool", tag:"default", if:"you're unsure what a model or setting costs", then:"test once small before a batch run", why:"One cheap probe beats discovering the cost across fifty outputs." },
     { cat:"Every tool", tag:"default", if:"a tool offers a 'max' preset", then:"treat max as a ceiling, not a default", why:"Maximums are there for the rare case that needs them, not for every job." },
     { cat:"Every tool", tag:"always", if:"the model lineup or pricing has changed", then:"re-verify these rules", why:"This space moves fast; a rule that saved credits last month can be stale today." },
   ],
+
+  /* ---- INPUT TIPS ---- shown with a recommendation. keyed by platform. */
+  inputTips: {
+    higgsfield: { do:["Start from a clean, high-contrast key frame.","Keep one clear subject; simple background."], dont:["Don't feed a noisy or low-res start frame.","Don't pad the duration to 'get more'."] },
+    freepik:    { do:["Feed the cleanest source you have.","Pick the factor from your target size, not the max."], dont:["Don't max every slider.","Don't upscale an already-upscaled image."] },
+    claude:     { do:["Give structured context with clear labels.","Show one example of the output you want."], dont:["Don't paste whole files when a slice will do.","Don't pad with preamble."] },
+    chatgpt:    { do:["Put standing rules in custom instructions.","For images, add one reference."], dont:["Don't re-explain the same context each time.","Don't rely on adjectives alone for images."] },
+  },
 };

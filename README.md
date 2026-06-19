@@ -1,71 +1,69 @@
 # Mileage
 
 A static website that helps you get more output per credit/token across
-Higgsfield, Magnific (Freepik), Claude and ChatGPT. No build step, no
-dependencies, no API, no account — just HTML, CSS and vanilla JavaScript.
+Higgsfield, Freepik, Claude and ChatGPT. You tell it what you're making; it
+recommends the **model** (Kling, Seedance, Nano Banana, Seedream, GPT Image…)
+and the **settings** that look good without wasting credits.
 
-## What's inside
+No build step, no dependencies, no API, no account — just HTML, CSS and vanilla JS.
+
+> **It doesn't touch prompts.** Rewriting or optimizing a prompt needs an AI of
+> its own, so Mileage deliberately leaves that out and stays fast and offline.
+
+## Tabs
 
 | Tab | What it does |
 | --- | --- |
-| **Tool picker** | Pick a task, get the tool + model + setting that does the job without overspending. Filter by category, search by keyword. |
-| **Recipes** | Per-use-case settings tuned for quality-per-credit, with a meter showing roughly what the wasteful default costs you. |
-| **Inputs** | What to feed each tool so you get it right on the first paid try. |
-| **Rule Book** | "If you're making ___, then always ___." Filterable checklist of hard rules, defaults and anti-patterns. |
-| **Plan picker** | Estimate your monthly credit burn, enter the plans a platform offers, and it ranks them — cheapest plan that covers you, best value per credit, and flags overbuying or shortfalls. Inputs are saved in your browser. |
+| **Home** | Calm landing — what the site is, how it works, and where to start. |
+| **Recommender** | Answer a couple of questions → get the model + settings for your case. The core of the site. |
+| **Models** | Strengths, weaknesses and best-use of each underlying model, by Video / Image. |
+| **Rule Book** | "If you're making ___, then always ___." Filterable checklist. |
+| **Plans** | Estimate your monthly burn, enter the plans on offer, get the cheapest plan that covers you. Saved in your browser. |
 
-## Run it locally
+## Run locally
 
 Double-click `index.html`, or serve the folder:
 
 ```bash
-python3 -m http.server 8000   # then open http://localhost:8000
+python3 -m http.server 8000   # open http://localhost:8000
 ```
 
 ## Deploy on GitHub Pages
 
-1. Create a new repository on GitHub (public is simplest for Pages).
+1. Create a repository on GitHub.
 2. Put these files in the repo root and push:
    ```
-   index.html
-   styles.css
-   data.js
-   app.js
-   README.md
+   index.html  styles.css  data.js  app.js  README.md
    ```
    ```bash
-   git init
-   git add .
-   git commit -m "Mileage site"
+   git init && git add . && git commit -m "Mileage"
    git branch -M main
    git remote add origin https://github.com/USERNAME/REPO.git
    git push -u origin main
    ```
-3. On GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch**,
-   pick **main** / **/ (root)**, save.
-4. Wait ~1 minute, then open `https://USERNAME.github.io/REPO/`.
-
-That's the whole deploy. Everyone on the team uses the same URL; nothing to install.
+3. GitHub → **Settings → Pages → Source: Deploy from a branch → main / root**, save.
+4. Open `https://USERNAME.github.io/REPO/` after ~1 minute.
 
 ## Keeping it current
 
-All the content lives in **`data.js`** — that's the only file you edit to update
-guidance. Each section is plain data with comments:
+Everything lives in **`data.js`** — the only file you edit:
 
-- `platforms` — the badges and their dot colours
-- `picker` — task → recommendation rows (`cost` is 1 low / 2 med / 3 high)
-- `recipes` — optimal vs overkill settings (`save` is 0–1, share of credits saved)
-- `inputs` — feed-it / avoid lists per platform
-- `rules` — the rule book (`tag` is `always` / `default` / `avoid`)
+- `platforms` — badges and dot colours
+- `models` — the library; each has `type` (video/image), `tier` (1–3), `tags`
+  (these drive the recommender), `strengths`, `weakness`, `bestFor`
+- `recommend` — the recommender's questions and the settings/tips per path
+- `rules` — the rule book (`tag`: always / default / avoid)
+- `inputTips` — the feed-it / avoid tips shown with a recommendation
 
-Edit, commit, push — Pages redeploys automatically.
+To add a model, drop a new object into `models` with the right `tags` and it
+automatically becomes selectable in the Recommender and visible in Models.
+
+Edit → commit → push. Pages redeploys on its own.
 
 ## Notes
 
-- Cost pills, recipe meters and rule numbers are **illustrative**, not live pricing.
-  Models and prices on these platforms change fast, so re-verify before trusting a figure.
-- The Plan picker saves your usage and plan inputs in your browser only
-  (`localStorage`), so a refresh won't lose them. It stores nothing online.
-- The prompt optimizer from the earlier prototype is intentionally left out, since
-  it needs a model API. If you ever want it back, it would need either a per-user
-  API key or a small shared proxy.
+- Model strengths, settings and credit figures are **illustrative**, not live
+  pricing. These platforms change fast — re-verify before trusting a number.
+- The Plan picker stores your inputs only in this browser (`localStorage`).
+- No prompt optimizer: that needs a model API. If you ever want it, it would
+  need either a per-user API key or a small shared proxy.
