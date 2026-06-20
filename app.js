@@ -2,55 +2,62 @@
 (function () {
   "use strict";
   var D = window.DATA;
-  var STORE = "mileage:v2";
+  var STORE = "mileage:v3";
 
   // ---------- helpers ----------
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
-  function platBadge(id, small) {
-    var p = D.platforms[id] || { label: id, tone: "text" };
-    return '<span class="plat plat--' + p.tone + (small ? " plat--sm" : "") + '">' + esc(p.label) + "</span>";
+  function platBadge(id) {
+    var p = D.platforms[id] || { label: id };
+    return '<span class="plat">' + esc(p.label) + "</span>";
   }
   function gauge(value, size) {
-    var cx = size / 2, cy = size * 0.82, r = size * 0.62, ang = Math.PI * (1 - value);
-    var nx = cx + Math.cos(ang) * (r - 5), ny = cy - Math.sin(ang) * (r - 5);
-    function arc(a0, a1, c) {
+    var cx = size / 2, cy = size * 0.82, r = size * 0.6, ang = Math.PI * (1 - value);
+    var nx = cx + Math.cos(ang) * (r - 4), ny = cy - Math.sin(ang) * (r - 4);
+    function arc(a0, a1, c, w) {
       var x0 = cx + Math.cos(a0) * r, y0 = cy - Math.sin(a0) * r, x1 = cx + Math.cos(a1) * r, y1 = cy - Math.sin(a1) * r;
-      return '<path d="M ' + x0 + ' ' + y0 + ' A ' + r + ' ' + r + ' 0 0 1 ' + x1 + ' ' + y1 + '" stroke="' + c + '" stroke-width="6" fill="none" stroke-linecap="round"/>';
+      return '<path d="M ' + x0 + ' ' + y0 + ' A ' + r + ' ' + r + ' 0 0 1 ' + x1 + ' ' + y1 + '" stroke="' + c + '" stroke-width="' + w + '" fill="none" stroke-linecap="round"/>';
     }
     return '<svg width="' + size + '" height="' + (size * 0.62) + '" viewBox="0 0 ' + size + ' ' + (size * 0.62) + '" aria-hidden="true">' +
-      arc(Math.PI, Math.PI * 0.72, "var(--coral)") + arc(Math.PI * 0.7, Math.PI * 0.42, "var(--amber)") + arc(Math.PI * 0.4, 0, "var(--mint)") +
+      arc(Math.PI, 0, "var(--line2)", 5) +
+      arc(Math.PI * 0.42, 0, "var(--green)", 5) +
       '<line x1="' + cx + '" y1="' + cy + '" x2="' + nx + '" y2="' + ny + '" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="3.5" fill="var(--ink)"/></svg>';
+      '<circle cx="' + cx + '" cy="' + cy + '" r="3" fill="var(--ink)"/></svg>';
   }
   function fmtInt(n) { return Math.round(n).toLocaleString(); }
   function fmtMoney(n) { return CURRENCY + Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
   function fmtCpc(n) { return CURRENCY + Number(n).toLocaleString(undefined, { maximumFractionDigits: 4 }); }
+  function copyTo(text, btn, okLabel) {
+    var restore = btn.textContent;
+    function done() { btn.textContent = okLabel || "Copied"; setTimeout(function () { btn.textContent = restore; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, done); }
+    else { try { var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); done(); } catch (e) {} }
+  }
 
   // ---------- persistence ----------
   function loadStore() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { return {}; } }
   function save() {
-    try { localStorage.setItem(STORE, JSON.stringify({ tab: TAB, usage: USAGE, plans: PLANS, currency: CURRENCY })); } catch (e) {}
+    try { localStorage.setItem(STORE, JSON.stringify({ tab: TAB, rec: REC, usage: USAGE, plans: PLANS, currency: CURRENCY })); } catch (e) {}
   }
   var saved = loadStore();
   var TAB = saved.tab || "home";
   var CURRENCY = saved.currency || "$";
+  var REC = saved.rec && saved.rec.video ? saved.rec : { medium: null, video: {}, image: {}, text: {} };
   var USAGE = saved.usage || [{ label: "Social reels", qty: 40, each: 5 }, { label: "Photo upscales", qty: 60, each: 2 }];
   var PLANS = saved.plans || [{ name: "Starter", price: 10, credits: 300 }, { name: "Pro", price: 24, credits: 900 }, { name: "Studio", price: 60, credits: 2500 }];
 
-  // ---------- masthead ----------
-  $("brandGauge").innerHTML = gauge(0.8, 34);
-  $("platStack").innerHTML = Object.keys(D.platforms).map(function (id) { return platBadge(id, true); }).join("");
+  // ---------- header ----------
+  $("brandGauge").innerHTML = gauge(0.78, 30);
   $("foot").textContent = "Seed data, reviewed Jun 2026 — models, settings and credit costs shift fast, so verify before trusting a number. Fully static: no account, no API, no tokens.";
 
   // ---------- tabs ----------
   var TABS = [
     { id: "home", label: "Home" },
-    { id: "recommender", label: "Recommender" },
+    { id: "recommender", label: "Recommend" },
     { id: "models", label: "Models" },
-    { id: "rules", label: "Rule Book" },
+    { id: "rules", label: "Rules" },
     { id: "plan", label: "Plans" },
   ];
   $("tabs").innerHTML = TABS.map(function (t) { return '<button class="tab" role="tab" data-tab="' + t.id + '">' + esc(t.label) + "</button>"; }).join("");
@@ -77,7 +84,7 @@
   ];
   $("tiles").innerHTML = TILES.map(function (t) {
     return '<button class="tile' + (t.primary ? " tile--primary" : "") + '" data-goto="' + t.go + '">' +
-      '<span class="tile__t">' + esc(t.t) + '<span class="arr">→</span></span>' +
+      '<span class="tile__t">' + esc(t.t) + '<span class="arr">\u2192</span></span>' +
       '<span class="tile__d">' + esc(t.d) + "</span></button>";
   }).join("");
   Array.prototype.forEach.call(document.querySelectorAll("[data-goto]"), function (b) {
@@ -85,23 +92,19 @@
   });
 
   // ---------- RECOMMENDER ----------
-  var REC = { medium: null, video: {}, image: {}, text: {} };
   var MEDIA = [{ id: "video", label: "Video" }, { id: "image", label: "Image" }, { id: "text", label: "Text" }];
+  var recoText = "";
 
   function optBtn(key, val, label, on) {
-    return '<button class="q__opt' + (on ? " q__opt--on" : "") + '" data-k="' + key + '" data-v="' + val + '">' + esc(label) + "</button>";
+    return '<button class="q__opt' + (on ? " q__opt--on" : "") + '" data-k="' + key + '" data-v="' + esc(val) + '">' + esc(label) + "</button>";
   }
   function qBlock(label, key, options, current) {
     return '<div class="q"><span class="q__label">' + esc(label) + '</span><div class="q__opts">' +
       options.map(function (o) { return optBtn(key, o.id, o.label, current === o.id); }).join("") + "</div></div>";
   }
-
   function renderRec() {
-    // medium selector
     $("recMedium").innerHTML = '<div class="q"><span class="q__label">What are you making?</span><div class="q__opts">' +
       MEDIA.map(function (m) { return optBtn("medium", m.id, m.label, REC.medium === m.id); }).join("") + "</div></div>";
-
-    // dependent questions
     var qhtml = "", cfg, a;
     if (REC.medium === "video") {
       cfg = D.recommend.video; a = REC.video;
@@ -120,51 +123,38 @@
       qhtml += qBlock(cfg.q1.label, "t_task", cfg.q1.options, a.task);
     }
     $("recQuestions").innerHTML = qhtml;
-
-    bindRec();
-    renderRecResult();
-  }
-
-  function bindRec() {
-    var btns = $("recMedium").querySelectorAll(".q__opt");
-    Array.prototype.forEach.call(btns, function (b) { b.addEventListener("click", recPick); });
+    Array.prototype.forEach.call($("recMedium").querySelectorAll(".q__opt"), function (b) { b.addEventListener("click", recPick); });
     Array.prototype.forEach.call($("recQuestions").querySelectorAll(".q__opt"), function (b) { b.addEventListener("click", recPick); });
+    renderRecResult();
+    save();
   }
   function recPick() {
     var k = this.getAttribute("data-k"), v = this.getAttribute("data-v");
-    if (k === "medium") { REC.medium = v; }
-    else if (k === "v_purpose") { REC.video.purpose = v; }
-    else if (k === "v_priority") { REC.video.priority = v; }
+    if (k === "medium") REC.medium = v;
+    else if (k === "v_purpose") REC.video.purpose = v;
+    else if (k === "v_priority") REC.video.priority = v;
     else if (k === "i_task") { REC.image.task = v; REC.image.style = null; REC.image.priority = null; }
-    else if (k === "i_style") { REC.image.style = v; }
-    else if (k === "i_priority") { REC.image.priority = v; }
-    else if (k === "t_task") { REC.text.task = v; }
+    else if (k === "i_style") REC.image.style = v;
+    else if (k === "i_priority") REC.image.priority = v;
+    else if (k === "t_task") REC.text.task = v;
     renderRec();
   }
+  $("recReset").addEventListener("click", function () { REC = { medium: null, video: {}, image: {}, text: {} }; renderRec(); });
 
   function findOpt(options, id) { for (var i = 0; i < options.length; i++) if (options[i].id === id) return options[i]; return null; }
-
   function scoreModels(type, want, boost, hard, priority) {
-    var cands = D.models.filter(function (m) {
-      if (m.type !== type) return false;
-      if (hard && m.tags.indexOf(hard) < 0) return false;
-      return true;
-    });
+    var cands = D.models.filter(function (m) { return m.type === type && (!hard || m.tags.indexOf(hard) >= 0); });
     cands.forEach(function (m) {
       var s = 0;
       want.forEach(function (t) { if (m.tags.indexOf(t) >= 0) s += 2; });
       boost.forEach(function (t) { if (m.tags.indexOf(t) >= 0) s += 3; });
       m._s = s;
     });
-    cands.sort(function (a, b) {
-      if (b._s !== a._s) return b._s - a._s;
-      return priority === "cost" ? a.tier - b.tier : b.tier - a.tier;
-    });
+    cands.sort(function (a, b) { return b._s !== a._s ? b._s - a._s : (priority === "cost" ? a.tier - b.tier : b.tier - a.tier); });
     return cands;
   }
-
-  function recoCard(eyebrow, name, badges, settings, whyHtml, altHtml, tips, credit) {
-    var chip = settings && settings.length ? '<div class="chipset">' + settings.map(function (s) { return '<span class="c">' + esc(s) + "</span>"; }).join("") + "</div>" : "";
+  function recoCard(eyebrow, name, badges, settings, whyHtml, altHtml, tips, credit, copyable) {
+    var chips = settings && settings.length ? '<div class="chipset">' + settings.map(function (s) { return '<span class="c">' + esc(s) + "</span>"; }).join("") + "</div>" : "";
     var tipsHtml = "";
     if (tips) {
       tipsHtml = '<div class="tips"><div class="tips__col tips__col--do"><span class="l">Feed it</span><ul>' +
@@ -172,40 +162,41 @@
         '<div class="tips__col tips__col--dont"><span class="l">Avoid</span><ul>' +
         tips.dont.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul></div></div>";
     }
-    return '<div class="reco"><p class="reco__eyebrow">' + esc(eyebrow) + '</p>' +
-      '<h3 class="reco__name">' + esc(name) + "</h3>" +
-      (badges ? '<div class="reco__row">' + badges + "</div>" : "") +
-      chip +
+    var copyBtn = copyable ? '<button class="btn btn--sm" id="copyReco">Copy setup</button>' : "";
+    return '<div class="reco"><div class="reco__head"><div><p class="reco__eyebrow">' + esc(eyebrow) + '</p>' +
+      '<h3 class="reco__name">' + esc(name) + "</h3></div>" + copyBtn + "</div>" +
+      (badges ? '<div class="reco__row">' + badges + "</div>" : "") + chips +
       '<p class="reco__why">' + whyHtml + "</p>" +
-      (altHtml ? '<p class="reco__alt">' + altHtml + "</p>" : "") +
-      tipsHtml +
+      (altHtml ? '<p class="reco__alt">' + altHtml + "</p>" : "") + tipsHtml +
       (credit ? '<p class="reco__credit">' + esc(credit) + "</p>" : "") + "</div>";
   }
-
+  function bindCopy() {
+    var b = $("copyReco");
+    if (b) b.addEventListener("click", function () { copyTo(recoText, b, "Copied"); });
+  }
   function renderRecResult() {
     var out = $("recResult"), m = REC.medium;
-    if (!m) { out.innerHTML = ""; return; }
+    if (!m) { out.innerHTML = ""; recoText = ""; return; }
 
     if (m === "text") {
       var t = REC.text.task ? findOpt(D.recommend.text.q1.options, REC.text.task) : null;
       if (!t) { out.innerHTML = ""; return; }
-      var badges = t.platforms.map(function (p) { return platBadge(p, true); }).join("");
+      var badges = t.platforms.map(platBadge).join("");
       var tips = D.inputTips[t.platforms[0]];
-      out.innerHTML = recoCard("Use this", t.pick + " — " + t.detail, badges, t.settings,
-        t.why, "", tips,
-        "These are model tiers, not credit caps. Match the tier to the task and you spend far less than defaulting to the top model.");
+      recoText = "Mileage setup — text\nUse: " + t.pick + " (" + t.detail + ")\nWhere: " + t.platforms.map(function (p) { return D.platforms[p].label; }).join(", ") +
+        "\nSettings: " + t.settings.join(", ") + "\nWhy: " + t.why;
+      out.innerHTML = recoCard("Use this", t.pick + " — " + t.detail, badges, t.settings, t.why, "", tips,
+        "These are model tiers, not credit caps. Match the tier to the task and you spend far less than defaulting to the top model.", true);
+      bindCopy();
       return;
     }
-
     if (m === "video") {
       var p = REC.video.purpose ? findOpt(D.recommend.video.q1.options, REC.video.purpose) : null;
       if (!p) { out.innerHTML = ""; return; }
       var pr = REC.video.priority ? findOpt(D.recommend.video.q2.options, REC.video.priority) : null;
-      var ranked = scoreModels("video", p.want, pr ? pr.boost : [], null, REC.video.priority);
-      finishCard(out, ranked, p.settings, p.label, pr);
+      finishCard(out, scoreModels("video", p.want, pr ? pr.boost : [], null, REC.video.priority), p.settings, p.label, pr);
       return;
     }
-
     if (m === "image") {
       var task = REC.image.task ? findOpt(D.recommend.image.q1.options, REC.image.task) : null;
       if (!task) { out.innerHTML = ""; return; }
@@ -214,33 +205,31 @@
       if (needStyle && !style) { out.innerHTML = ""; return; }
       var ipr = REC.image.priority ? findOpt(D.recommend.image.q3.options, REC.image.priority) : null;
       var want = (style ? style.want : []).slice();
-      var ranked = scoreModels("image", want, ipr ? ipr.boost : [], task.hard, REC.image.priority);
-      var label = task.label + (style ? " · " + style.label : "");
-      finishCard(out, ranked, task.settings, label, ipr);
+      var label = task.label + (style ? " \u00b7 " + style.label : "");
+      finishCard(out, scoreModels("image", want, ipr ? ipr.boost : [], task.hard, REC.image.priority), task.settings, label, ipr);
       return;
     }
   }
-
   function finishCard(out, ranked, settings, contextLabel, priorityOpt) {
-    if (!ranked.length) { out.innerHTML = recoCard("Hmm", "No model fits that combination", "", null, "Try a different priority — every path here should land on a model.", "", null, ""); return; }
-    var primary = ranked[0];
-    var alt = null;
+    if (!ranked.length) { out.innerHTML = recoCard("Hmm", "No model fits that combination", "", null, "Try a different priority.", "", null, "", false); return; }
+    var primary = ranked[0], alt = null;
     for (var i = 1; i < ranked.length; i++) { if (ranked[i].id !== primary.id) { alt = ranked[i]; break; } }
-    var badges = primary.platforms.map(function (p) { return platBadge(p, true); }).join("");
+    var badges = primary.platforms.map(platBadge).join("");
     var why = "Best for <b>" + esc(contextLabel.toLowerCase()) + "</b>" + (priorityOpt ? " when you want " + esc(priorityOpt.label.toLowerCase()) : "") + ". " + esc(primary.bestFor);
     var altHtml = alt ? "Leaning another way? <b>" + esc(alt.label) + "</b> — " + esc(alt.bestFor) : "";
     var tips = D.inputTips[primary.platforms[0]];
+    recoText = "Mileage setup — " + contextLabel + "\nModel: " + primary.label + " (" + primary.platforms.map(function (p) { return D.platforms[p].label; }).join(", ") + ")\nSettings: " + settings.join(", ") + "\nWhy: " + primary.bestFor + (alt ? "\nAlt: " + alt.label + " — " + alt.bestFor : "");
     out.innerHTML = recoCard("Use this model", primary.label, badges, settings, why, altHtml, tips,
-      "Settings are the starting point that looks good without overspending. Nudge up only if the final medium actually shows it.");
+      "Settings are the starting point that looks good without overspending. Nudge up only if the final medium actually shows it.", true);
+    bindCopy();
   }
 
   // ---------- MODELS ----------
-  var mCat = "All";
-  var mCats = ["All", "Video", "Image"];
+  var mCat = "All", mCats = ["All", "Video", "Image"];
   $("modelChips").innerHTML = mCats.map(function (c) { return '<button class="chip' + (c === mCat ? " chip--on" : "") + '" data-c="' + c + '">' + c + "</button>"; }).join("");
   function tierDots(tier) {
     var s = "";
-    for (var i = 1; i <= 3; i++) s += '<i class="' + (i <= tier ? "on" + tier : "") + '"></i>';
+    for (var i = 1; i <= 3; i++) s += '<i class="' + (i <= tier ? "on" : "") + '"></i>';
     var lbl = tier === 1 ? "cheap" : tier === 2 ? "mid" : "premium";
     return '<span class="tier">' + s + "<b>" + lbl + "</b></span>";
   }
@@ -253,7 +242,7 @@
     });
     $("modelGrid").innerHTML = list.map(function (m) {
       return '<article class="mcard"><div class="mcard__top"><h3 class="mcard__name">' + esc(m.label) + "</h3>" + tierDots(m.tier) + "</div>" +
-        '<div class="mcard__row">' + m.platforms.map(function (p) { return platBadge(p, true); }).join("") + "</div>" +
+        '<div class="mcard__row">' + m.platforms.map(platBadge).join("") + "</div>" +
         '<p class="mcard__best"><b>Best for:</b> ' + esc(m.bestFor) + "</p>" +
         '<span class="mcard__l mcard__l--s">Strengths</span><ul class="mcard__str">' +
         m.strengths.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul>" +
@@ -270,17 +259,15 @@
   });
   $("modelSearch").addEventListener("input", renderModels);
 
-  // ---------- RULE BOOK ----------
-  var rCat = "All";
-  var rCats = ["All", "Video", "Image & Upscale", "Text & Reasoning", "Every tool"];
+  // ---------- RULES ----------
+  var rCat = "All", rCats = ["All", "Video", "Image & Upscale", "Text & Reasoning", "Every tool"];
   var TAGLBL = { always: "Always", default: "Default", avoid: "Avoid" };
   $("rulesChips").innerHTML = rCats.map(function (c) { return '<button class="chip' + (c === rCat ? " chip--on" : "") + '" data-c="' + esc(c) + '">' + esc(c) + "</button>"; }).join("");
   function renderRules() {
     var q = $("rulesSearch").value.toLowerCase().trim(), html = "", total = 0;
     rCats.filter(function (c) { return c !== "All"; }).forEach(function (cat) {
       var items = D.rules.filter(function (r) {
-        return r.cat === cat && (rCat === "All" || r.cat === rCat) &&
-          (q === "" || (r.if + " " + r.then + " " + r.why).toLowerCase().indexOf(q) >= 0);
+        return r.cat === cat && (rCat === "All" || r.cat === rCat) && (q === "" || (r.if + " " + r.then + " " + r.why).toLowerCase().indexOf(q) >= 0);
       });
       if (!items.length) return;
       total += items.length;
@@ -304,6 +291,7 @@
     });
   });
   $("rulesSearch").addEventListener("input", renderRules);
+  $("printRules").addEventListener("click", function () { window.print(); });
 
   // ---------- PLAN PICKER ----------
   function num(v) { var n = parseFloat(v); return isFinite(n) ? n : 0; }
@@ -380,7 +368,7 @@
     if (covering.length) {
       var fit = covering[0]; pickName = fit.name;
       var body = "<b>" + esc(fit.name) + "</b> is the cheapest plan that covers your ~" + fmtInt(usage) + " credits/mo, at <b>" +
-        fmtCpc(fit.cpc) + "/credit</b>, leaving " + fmtInt(fit.headroom) + " credits (" + fit.headroomPct + "%) of headroom.";
+        fmtCpc(fit.cpc) + "/credit</b> — about " + fmtMoney(fit.price * 12) + "/yr at this plan, with " + fmtInt(fit.headroom) + " credits (" + fit.headroomPct + "%) of headroom.";
       if (fit.headroomPct !== null && fit.headroomPct < 12) { var next = covering[1]; body += " That headroom is thin" + (next ? " — if usage swings, " + esc(next.name) + " gives more room." : "."); }
       if (bestValue && bestValue.name !== fit.name && bestValue.credits > fit.credits) {
         body += " If you expect to grow, <b>" + esc(bestValue.name) + "</b> is cheaper per credit (" + fmtCpc(bestValue.cpc) + ") but buys " + fmtInt(bestValue.credits - usage) + " credits you wouldn't use yet.";

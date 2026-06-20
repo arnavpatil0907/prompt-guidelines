@@ -13,14 +13,9 @@
 <body>
 <div class="wrap">
   <header class="topbar">
-    <div class="topbar__brand">
-      <span id="brandGauge"></span>
-      <span class="topbar__name">Mileage</span>
-    </div>
-    <div class="mast__stack" id="platStack"></div>
+    <div class="brand"><span id="brandGauge"></span><span class="brand__name">Mileage</span></div>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
   </header>
-
-  <nav class="tabs" id="tabs" role="tablist"></nav>
 
   <main class="main">
 
@@ -29,25 +24,23 @@
       <div class="hero">
         <p class="hero__kicker">Credit &amp; token mileage</p>
         <h1 class="hero__title">Stop paying for output <em>no one can see.</em></h1>
-        <p class="hero__sub">Tell Mileage what you're making. It points you to the right model — Kling, Seedance, Nano Banana, Seedream, GPT and more — and the exact settings that look good without burning credits across Higgsfield, Freepik, Claude and ChatGPT.</p>
+        <p class="hero__sub">Tell Mileage what you're making. It points you to the right model — Kling, Seedance, Nano Banana, Seedream, GPT and more — and the settings that look good without burning credits across Higgsfield, Freepik, Claude and ChatGPT.</p>
         <div class="hero__note">
-          <span class="mk">note</span>
-          <span><b>Mileage tunes models and settings, not prompts.</b> Rewriting or optimizing a prompt needs an AI of its own — so this tool deliberately leaves that out and stays fast, free and fully offline.</span>
+          <span class="mk"></span>
+          <span><b>Mileage tunes models and settings, not prompts.</b> Rewriting or optimizing a prompt needs an AI of its own — so this tool leaves that out and stays fast, free and fully offline.</span>
         </div>
       </div>
-
       <div class="steps">
         <div class="step"><span class="step__n">01</span><span class="step__t"><b>Tell it what you're making</b> — a reel, an upscale, a hard reasoning task.</span></div>
         <div class="step"><span class="step__n">02</span><span class="step__t"><b>It picks the model and settings</b> tuned for quality per credit.</span></div>
         <div class="step"><span class="step__n">03</span><span class="step__t"><b>You spend less</b> and skip the trial-and-error re-rolls.</span></div>
       </div>
-
       <div class="tiles" id="tiles"></div>
     </section>
 
     <!-- RECOMMENDER -->
     <section class="view" id="view-recommender" role="tabpanel">
-      <h2 class="section-h">Recommend my setup</h2>
+      <div class="view-head"><h2 class="section-h">Recommend my setup</h2><button class="btn btn--ghost btn--sm" id="recReset">Start over</button></div>
       <div class="rec">
         <p class="rec__caveat">Answer a couple of questions and Mileage names the model + settings. It won't write your prompt — that needs an AI; everything here is just routing logic.</p>
         <div id="recMedium"></div>
@@ -58,8 +51,8 @@
 
     <!-- MODELS -->
     <section class="view" id="view-models" role="tabpanel">
-      <h2 class="section-h">Models, by strength</h2>
-      <p class="view__intro">The same platform hosts several models, and they're good at different things. Pick the one that fits the job — the Recommender does this for you, this is the reference behind it.</p>
+      <div class="view-head"><h2 class="section-h">Models, by strength</h2></div>
+      <p class="view__intro">The same platform hosts several models, and they're good at different things. The Recommender picks for you — this is the reference behind it.</p>
       <div class="controls">
         <div class="chips" id="modelChips"></div>
         <input class="search" id="modelSearch" placeholder="Search models…" aria-label="Search models" />
@@ -70,7 +63,7 @@
 
     <!-- RULES -->
     <section class="view" id="view-rules" role="tabpanel">
-      <h2 class="section-h">Rule Book</h2>
+      <div class="view-head"><h2 class="section-h">Rule Book</h2><button class="btn btn--sm" id="printRules">Print / PDF</button></div>
       <p class="view__intro">If you're making ___, always do ___. Read it like a checklist.</p>
       <div class="controls">
         <div class="chips" id="rulesChips"></div>
@@ -87,7 +80,7 @@
 
     <!-- PLANS -->
     <section class="view" id="view-plan" role="tabpanel">
-      <h2 class="section-h">Plan picker</h2>
+      <div class="view-head"><h2 class="section-h">Plan picker</h2></div>
       <p class="view__intro">Work out which credit pack to buy. Estimate your monthly burn on the left, drop in the plans a platform offers on the right, and Mileage ranks them. Inputs are saved in this browser.</p>
       <div class="plan">
         <div class="panel">

@@ -60,6 +60,19 @@ automatically becomes selectable in the Recommender and visible in Models.
 
 Edit → commit → push. Pages redeploys on its own.
 
+## Quality-of-life
+
+- **Copy setup** — every recommendation has a button that copies the model +
+  settings + reasoning as plain text to paste into a brief or doc.
+- **Start over** — resets the recommender in one tap.
+- **Remembers your last recommendation**, plan inputs and tab between visits.
+- **Annual projection** in the plan picker (e.g. "about $288/yr at this plan").
+- **Print / PDF** on the Rule Book — a print stylesheet strips the chrome so it
+  prints as a clean checklist.
+
+Palette is white · black · `#2DAF2F`. To re-skin, change the `--green*` and
+neutral variables at the top of `styles.css`.
+
 ## Notes
 
 - Model strengths, settings and credit figures are **illustrative**, not live
